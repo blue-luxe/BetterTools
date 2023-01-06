@@ -1179,26 +1179,26 @@ var tempDouble;
 var tempI64;
 
 var ASM_CONSTS = {
- 3431080: function() {
+ 3431064: function() {
   Module["emscripten_get_now_backup"] = performance.now;
  },
- 3431135: function($0) {
+ 3431119: function($0) {
   performance.now = function() {
    return $0;
   };
  },
- 3431183: function($0) {
+ 3431167: function($0) {
   performance.now = function() {
    return $0;
   };
  },
- 3431231: function() {
+ 3431215: function() {
   performance.now = Module["emscripten_get_now_backup"];
  },
- 3431286: function() {
+ 3431270: function() {
   return Module.webglContextAttributes.premultipliedAlpha;
  },
- 3431347: function() {
+ 3431331: function() {
   return Module.webglContextAttributes.preserveDrawingBuffer;
  }
 };
@@ -1316,6 +1316,30 @@ function _DownloadFile(array, size, fileNamePtr) {
  event.initMouseEvent("click");
  link.dispatchEvent(event);
  window.URL.revokeObjectURL(link.href);
+}
+
+function _EnterHostRoom() {
+ function getGet(name) {
+  var s = window.location.search;
+  s = s.match(new RegExp(name + "=([^&=]+)"));
+  return s ? s[1] : false;
+ }
+ var buf = getGet("room");
+ if (buf == false) {
+  var returnStr = "111111";
+  var bufferSize = lengthBytesUTF8(returnStr) + 1;
+  var buffer = _malloc(bufferSize);
+  stringToUTF8(returnStr, buffer, bufferSize);
+  console.log(buffer);
+  return buffer;
+ } else {
+  var returnStr = buf;
+  var bufferSize = lengthBytesUTF8(returnStr) + 1;
+  var buffer = _malloc(bufferSize);
+  stringToUTF8(returnStr, buffer, bufferSize);
+  console.log(buffer);
+  return buffer;
+ }
 }
 
 function _GetVoxFile(LoadMod, JsonjsModel, type) {
@@ -14324,6 +14348,7 @@ function intArrayFromString(stringy, dontAddNull, length) {
 
 var asmLibraryArg = {
  "DownloadFile": _DownloadFile,
+ "EnterHostRoom": _EnterHostRoom,
  "GetVoxFile": _GetVoxFile,
  "JS_Accelerometer_IsRunning": _JS_Accelerometer_IsRunning,
  "JS_Accelerometer_Start": _JS_Accelerometer_Start,
