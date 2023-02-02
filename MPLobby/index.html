@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <style>
+    html {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      /* Убираем отступы */
+      height: 100%;
+      /* Высота страницы */
+      background: url(TemplateData/bg.png);
+      /* Параметры фона */
+      background-size: cover;
+      /* Фон занимает всю доступную площадь */
+    }
+
+    .shadow {
+      box-shadow: 0 0 20px rgba(0, 0, 0, .2);
+      border: 2px solid rgb(255, 255, 255);
+      /* Параметры тени */
+      padding: 0px;
+    }
+  </style>
+
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Unity WebGL Player | BetterSpace</title>
+  <link rel="shortcut icon" href="TemplateData/favicon.ico">
+  <link rel="stylesheet" href="TemplateData/style.css">
+</head>
+
+<body>
+  <div id="unity-container" class="unity-desktop">
+
+    <img class="shadow" id="SPLASH_SCREEN" src="TemplateData/SPLASH_SCREEN.png" style="position: absolute;">
+    <p id="text_change" style="position: absolute; left: 50%; top: 85%;">123</p>
+    <canvas class="shadow" id="unity-canvas" width=1280 height=720></canvas>
+    <div id="unity-loading-bar">
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
+      </div>
+    </div>
+    <div id="unity-warning"> </div>
+    <div id="unity-footer">
+      <!-- <div id="unity-diskord-button"></div> -->
+      <div id="unity-telegram-button"></div>
+      <!-- <div id="unity-fullscreen-button"></div> -->
+      <div id="unity-build-title">BetterSpace</div>
+    </div>
+  </div>
+  <script>
+    var p = document.getElementById('text_change');
+
+    var container = document.querySelector("#unity-container");
+    var canvas = document.querySelector("#unity-canvas");
+    var SPLASH_SCREEN = document.querySelector("#SPLASH_SCREEN");
+    var loadingBar = document.querySelector("#unity-loading-bar");
+    var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    // var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+    var warningBanner = document.querySelector("#unity-warning");
+
+    // Shows a temporary message banner/ribbon for a few seconds, or
+    // a permanent error message on top of the canvas if type=='error'.
+    // If type=='warning', a yellow highlight color is used.
+    // Modify or remove this function to customize the visually presented
+    // way that non-critical warnings and error messages are presented to the
+    // user.
+    function unityShowBanner(msg, type) {
+      function updateBannerVisibility() {
+        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+      }
+      var div = document.createElement('div');
+      div.innerHTML = msg;
+      warningBanner.appendChild(div);
+      if (type == 'error') div.style = 'background: red; padding: 10px;';
+      else {
+        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(function () {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
+      }
+      updateBannerVisibility();
+    }
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/betterspace-build.loader.js";
+    var config = {
+      dataUrl: buildUrl + "/betterspace-build.data",
+      frameworkUrl: buildUrl + "/betterspace-build.framework.js",
+      codeUrl: buildUrl + "/betterspace-build.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "VoxelGenerator",
+      productVersion: "1.17",
+      showBanner: unityShowBanner,
+    };
+
+
+    if (((window.innerWidth * 0.8) * (720 / 1280)) > (window.innerHeight * 0.8)) {
+      canvas.style.height = (window.innerHeight * 0.6) + "px";
+      canvas.style.width = ((window.innerHeight * 0.6) * (1280 / 720)) + "px";
+    } else {
+      canvas.style.height = ((window.innerWidth * 0.8) * (720 / 1280)) + "px";
+      canvas.style.width = (window.innerWidth * 0.8) + "px";
+    }
+
+    SPLASH_SCREEN.style.height = canvas.style.height;
+    SPLASH_SCREEN.style.width = canvas.style.width;
+
+
+
+    loadingBar.style.display = "block";
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    var myGameInstance = null;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = 100 * progress + "%";
+        p.innerHTML = Math.ceil(100 * progress) + "%";
+      }).then((unityInstance) => {
+        myGameInstance = unityInstance;
+        loadingBar.style.display = "none";
+
+        setTimeout(function () {
+          SPLASH_SCREEN.style.display = "none";
+          p.style.display = "none";
+        }, 2500);
+      }).catch((message) => {
+        alert(message);
+      });
+
+    };
+    document.body.appendChild(script);
+    function checkBrowser() {
+      var browser, uAgent = navigator.userAgent;
+      if (uAgent.search("Firefox") > -1) {
+        browser = "Mozilla Firefox";
+      }
+      else if (uAgent.indexOf("OPR") > -1) {
+        browser = "Opera";
+      }
+      else if (uAgent.indexOf("Trident") > -1) {
+        browser = "Microsoft Internet Explorer";
+      }
+      else if (uAgent.indexOf("YaBrowser") > -1) {
+        browser = "Yandex";
+      }
+      else if (uAgent.search("Chrome") > -1) {
+        browser = "Google Chrome";
+      }
+      else if (uAgent.indexOf("Safari") > -1) {
+        browser = "Safari";
+      }
+      myGameInstance.SendMessage("JSManager", "ErrorB", browser.toString());
+    }
+  </script>
+</body>
+
+</html>
